@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>0A02F03B-3534-4696-9661-90B7F8741741</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Pledges</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>F44124CE3C8D88B9BF639265E716F4155747D626</key>
+		<string>github.com:robertfmurdock/Pledges.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Pledges.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>F44124CE3C8D88B9BF639265E716F4155747D626</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:robertfmurdock/Pledges.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>F44124CE3C8D88B9BF639265E716F4155747D626</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F44124CE3C8D88B9BF639265E716F4155747D626</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Pledges</string>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -1,3 +1,3 @@
 target "PledgesTests" do
-pod 'ArmorTestKit', :path => '../ArmorTestKit'
+pod 'ArmorTestKit', :git => 'https://github.com/robertfmurdock/ArmorTestKit.git'
 end

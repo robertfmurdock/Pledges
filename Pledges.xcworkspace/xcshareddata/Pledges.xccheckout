@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9A5194AD-1AB1-48D2-81C6-919646FD1B65</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Pledges</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6</key>
+		<string>github.com:robertfmurdock/ArmorTestKit.git</string>
+		<key>F44124CE3C8D88B9BF639265E716F4155747D626</key>
+		<string>github.com:robertfmurdock/Pledges.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Pledges.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6</key>
+		<string>../../ArmorTestKit</string>
+		<key>F44124CE3C8D88B9BF639265E716F4155747D626</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:robertfmurdock/Pledges.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>F44124CE3C8D88B9BF639265E716F4155747D626</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ArmorTestKit</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F44124CE3C8D88B9BF639265E716F4155747D626</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Pledges</string>
+		</dict>
+	</array>
+</dict>
+</plist>

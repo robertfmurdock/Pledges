@@ -2,11 +2,16 @@ PODS:
   - ArmorTestKit (0.1)
 
 DEPENDENCIES:
-  - ArmorTestKit (from `../ArmorTestKit`)
+  - ArmorTestKit (from `https://github.com/robertfmurdock/ArmorTestKit.git`)
 
 EXTERNAL SOURCES:
   ArmorTestKit:
-    :path: ../ArmorTestKit
+    :git: https://github.com/robertfmurdock/ArmorTestKit.git
+
+CHECKOUT OPTIONS:
+  ArmorTestKit:
+    :commit: bb5712723e9cc695f33a859c3bc6b8df891c02ee
+    :git: https://github.com/robertfmurdock/ArmorTestKit.git
 
 SPEC CHECKSUMS:
   ArmorTestKit: bb7433d803b4531d7e2f9307c724847edd1136f1

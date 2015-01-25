@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4BB6F52A4F9EB69D000D6F00"
+               BlueprintIdentifier = "453BD723901796DBF62DF4E2"
                BuildableName = "ArmorTestKit.framework"
                BlueprintName = "Pods-PledgesTests-ArmorTestKit"
                ReferencedContainer = "container:Pods.xcodeproj">
