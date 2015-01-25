@@ -1,0 +1,22 @@
+{
+  "name": "ArmorTestKit",
+  "version": "0.1",
+  "social_media_url": "https://twitter.com/zeGreatRoB",
+  "homepage": "http://robertfmurdock.github.io",
+  "authors": {
+    "Rob Murdock": "rmurdock@pillartechnology.com"
+  },
+  "source": {
+    "git": "https://github.com/robertfmurdock/ArmorTestKit.git",
+    "tag": "0.1"
+  },
+  "license": "MIT",
+  "summary": "A few testing assertions to make XCTest more tolerable.",
+  "platforms": {
+    "ios": "8.0",
+    "osx": "10.10"
+  },
+  "source_files": "ArmorTestKit/*.swift",
+  "frameworks": "XCTest",
+  "requires_arc": true
+}

@@ -1,0 +1,6 @@
+framework module ArmorTestKit {
+  umbrella header "Pods-PledgesTests-ArmorTestKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

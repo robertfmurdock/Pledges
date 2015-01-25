@@ -1,0 +1,2 @@
+PODS_PLEDGESTESTS_ARMORTESTKIT_FRAMEWORK_SEARCH_PATHS = $(inherited) "$(SDKROOT)/Developer/Library/Frameworks" "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+PODS_PLEDGESTESTS_ARMORTESTKIT_OTHER_LDFLAGS = -framework "XCTest"
