@@ -1,5 +1,5 @@
 before_install:
   sudo gem install cocoapods --pre
 language: objective-c
-xcode_project: Pledges.xcodeproj # path to your xcodeproj folder
+xcode_workspace: Pledges.xcworkspace # path to your xcodeproj folder
 xcode_scheme: Pledges
