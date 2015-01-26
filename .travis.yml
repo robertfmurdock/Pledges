@@ -1,5 +1,2 @@
-before_install:
-  sudo gem install cocoapods --pre
 language: objective-c
-xcode_workspace: Pledges.xcworkspace # path to your xcodeproj folder
-xcode_scheme: Pledges
+script: "xcodebuild test -workspace Pledges.xcworkspace -scheme Pledges -destination \"platform=iOS Simulator,name=iPhone 5\""
