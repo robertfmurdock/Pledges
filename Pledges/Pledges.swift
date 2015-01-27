@@ -9,7 +9,7 @@ import Foundation
 
 public protocol Promise {
     func when(#then : ( value: Any) -> Void) -> Promise
-    func when(#fail : ( error : String) -> Void) -> Promise
+    func when(#fail : ( error : NSError) -> Void) -> Promise
 }
 
 public func runOnBackground<T>(action : Pledge<T>.Action) -> Pledge<T> {
@@ -44,15 +44,15 @@ public class Pledge <T> : Promise {
         return Pledge { resolve, reject in resolve(value: value) }
     }
     
-    public class func reject(error: String) -> Pledge<T> {
+    public class func reject(error: NSError) -> Pledge<T> {
         return Pledge { resolve, reject in reject(error: error)}
     }
     
     public class func isNil(value: T?) -> Pledge<T> {
-        return isNil(value, error: "Value was nil.")
+        return isNil(value, error: NSError(domain: "Value was nil", code: 1, userInfo: nil))
     }
     
-    public class func isNil(value: T?, error: String) -> Pledge<T> {
+    public class func isNil(value: T?, error: NSError) -> Pledge<T> {
         return Pledge<T> { resolve, reject in
             if let theValue = value {
                 resolve(value: theValue)
@@ -64,7 +64,7 @@ public class Pledge <T> : Promise {
     
     public typealias Return = T
     public typealias Resolve = (value: T) -> Void
-    public typealias Reject = (error : String) -> Void
+    public typealias Reject = (error : NSError) -> Void
     public typealias Action = (resolve : Resolve, reject : Reject) -> Void
     
     let action : Action
@@ -72,7 +72,7 @@ public class Pledge <T> : Promise {
     private var thenQueue = [Resolve]()
     private var failQueue = [Reject]()
     private var potentialResult : T?
-    private var potentialError : String?
+    private var potentialError : NSError?
     private var failWasHandled = false
     
     public convenience init(action: Action){
@@ -90,13 +90,13 @@ public class Pledge <T> : Promise {
             self.thenQueue.removeAll(keepCapacity: false)
         }
         
-        let handleError : Reject = { (error : String ) in
+        let handleError : Reject = { (error : NSError ) in
             if self.potentialResult == nil {
                 let hasNotAlreadyFailed = self.potentialError == nil
                 if hasNotAlreadyFailed && self.failQueue.count == 0 {
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * 1000000000)), timeoutQueue) {
                         if !self.failWasHandled {
-                            pledgeFallbackReject(error: "Uncaught Pledge failure: \(error)")
+                            pledgeFallbackReject(error: Error("Uncaught Pledge failure: \(error.description)", 12, userInfo: error.userInfo))
                         }
                     }
                 }
@@ -112,7 +112,7 @@ public class Pledge <T> : Promise {
         action(resolve : handleResolution, reject: handleError)
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * 1000000000)), timeoutQueue) {
             if self.potentialResult == nil && self.potentialError == nil {
-                handleError(error: "Pledge did not resolve or reject before timeout of \(timeout) second.")
+                handleError(error: Error("Pledge did not resolve or reject before timeout of \(timeout) second.", 2))
             }
         }
     }
@@ -133,7 +133,8 @@ public class Pledge <T> : Promise {
     public func then<K>(errorWrapper: String = "", _ convert: (value: T) -> K) -> Pledge<K> {
         return Pledge<K> { resolveAgain, rejectAgain in
             self.then { value in resolveAgain(value: convert(value: value)) }
-            self.fail { error in rejectAgain(error: errorWrapper + error) }
+            self.fail { error in
+                rejectAgain(error: wrap(errorWrapper + error.description, error)) }
         }
     }
     
@@ -146,11 +147,11 @@ public class Pledge <T> : Promise {
             self.then { value in
                 let pledge = convert(value: value)
                 pledge.then(resolveAgain).fail { error in
-                    rejectAgain(error: errorWrapper + error)
+                    rejectAgain(error: wrap(errorWrapper, error))
                 }
             }
             self.fail { error in
-                rejectAgain(error: errorWrapper + error)
+                rejectAgain(error: wrap(errorWrapper, error))
             }
         }
     }
@@ -162,7 +163,7 @@ public class Pledge <T> : Promise {
     public func thenPledge<K>(errorWrapper: String, convert: (value: T, resolve : Pledge<K>.Resolve, reject : Pledge<K>.Reject) -> Void) -> Pledge<K> {
         return Pledge<K> { resolveAgain, rejectAgain in
             self.then { value in convert(value: value, resolve: resolveAgain, rejectAgain) }
-            self.fail { error in rejectAgain(error: errorWrapper + error) }
+            self.fail { error in rejectAgain(error: wrap(errorWrapper, error)) }
         }
     }
     
@@ -184,7 +185,7 @@ public class Pledge <T> : Promise {
         return self.then(wrappedThen)
     }
     
-    public func when(#fail : ( error : String) -> Void) -> Promise {
+    public func when(#fail : ( error : NSError) -> Void) -> Promise {
         return self.fail(fail)
     }
     
@@ -267,7 +268,7 @@ public func all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(failFast: Bool = f
         }
 }
 
-public typealias AnyErrorDescriber = (index: Int, error: String) -> String
+public typealias AnyErrorDescriber = (index: Int, errorDescription: String) -> String
 
 public func all<T>(failFast: Bool = false, #pledges : [Pledge<T>], errorWrapper: String = "Array error", describeErr: AnyErrorDescriber = { index, error in " [\(index)] <\(error)>"})
     -> Pledge<[T]> {
@@ -282,7 +283,7 @@ private func connectPledges<T>(failFast: Bool, pledges : [Pledge<T>], errorWrapp
 {
     return Pledge<[T]> { resolve, reject in
         var results = [Int : T]()
-        var errors = [Int: String]()
+        var errors = [Int: NSError]()
         for (index, promise) in enumerate(pledges) {
             promise
                 .then { value in
@@ -295,13 +296,34 @@ private func connectPledges<T>(failFast: Bool, pledges : [Pledge<T>], errorWrapp
                 }
                 .fail { error in
                     if failFast {
-                        reject(error: "\(errorWrapper)\(describeErr(index: index, error: error))")
+                        reject(error: wrap(errorWrapper, error, index, describeErr))
                     } else {
-                        errors[index] = "\(errorWrapper)\(describeErr(index: index, error: error))"
+                        errors[index] = wrap(errorWrapper, error, index, describeErr)
                         reportCumulativeError(results, errors, pledges.count, reject)
                     }
             }
         }
+    }
+}
+
+private func wrap(message: String, error: NSError) -> NSError {
+    if message == "" {
+        return error
+    } else {
+        var userInfo = error.userInfo ?? [:]
+        userInfo[NSUnderlyingErrorKey] = error
+        return Error(message + error.description, error.code, userInfo: userInfo)
+    }
+}
+
+private func wrap(message: String, error: NSError, index: Int, describeErr: AnyErrorDescriber) -> NSError {
+    let description = "\(message)\(describeErr(index: index, errorDescription: error.localizedDescription))"
+    if description == error.localizedDescription {
+        return error
+    } else {
+        var userInfo = error.userInfo ?? [:]
+        userInfo[NSUnderlyingErrorKey] = error
+        return Error(description, error.code, userInfo: userInfo)
     }
 }
 
@@ -317,21 +339,28 @@ private func convertIndexDictionaryToArray<T>(dictionary: [Int: T]) -> [T] {
     return finalResults
 }
 
-private func reportCumulativeError<T>(results: [Int: T], errors: [Int: String], pledgeCount: Int, reject : Pledge<[T]>.Reject) {
+private func reportCumulativeError<T>(results: [Int: T], errors: [Int: NSError], pledgeCount: Int, reject : Pledge<[T]>.Reject) {
     if (errors.count + results.count) == pledgeCount {
         if errors.count == 1 {
             reject(error: errors.values.first!)
         } else {
             var cumulativeError = "[\n"
+            var userInfo = [NSError]()
             let errorArray = convertIndexDictionaryToArray(errors)
             for error in errorArray {
-                cumulativeError += error
+                cumulativeError += error.localizedDescription
                 cumulativeError += "\n"
             }
             cumulativeError += "]"
-            reject(error: cumulativeError)
+            reject(error: Error(cumulativeError, 99, userInfo: [NSUnderlyingErrorKey: errorArray]))
         }
     }
+}
+
+private func Error(description: String, code: Int, userInfo: [NSObject : AnyObject]? = nil) -> NSError {
+    var revisedUserInfo: [NSObject : AnyObject] = userInfo ?? [:]
+    revisedUserInfo[NSLocalizedDescriptionKey] = description
+    return NSError(domain: "Pledges", code: code, userInfo: revisedUserInfo)
 }
 
 public func all(failFast: Bool = false, #promises : [Promise]) -> Pledge<[Any]>
