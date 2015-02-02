@@ -142,7 +142,7 @@ public class Pledge <T> : Promise {
         return Pledge<K> { resolveAgain, rejectAgain in
             self.then { value in resolveAgain(value: convert(value: value)) }
             self.fail { error in
-                rejectAgain(error: wrapError(errorWrapper + error.localizedDescription, error)) }
+                rejectAgain(error: wrapError(errorWrapper, error)) }
         }
     }
     
@@ -326,7 +326,7 @@ public func wrapError(message: String, error: NSError) -> NSError {
 
 private func wrap(message: String, error: NSError, index: Int, describeErr: AnyErrorDescriber) -> NSError {
     let description = "\(message)\(describeErr(index: index, errorDescription: error.localizedDescription))"
-    if description == error.localizedDescription {
+    if message == "" || description == error.localizedDescription {
         return error
     } else {
         var userInfo = error.userInfo ?? [:]
