@@ -13,7 +13,7 @@ import Pledges
 
 class PledgeTests : XCTestCase {
     
-    func testPromiseWillCallActionImmediatelyOnInit() {
+    func testWhenCreatingAPromiseTheGivenActionIsCalledImmediately() {
         var actionWasCalled = false
         Pledge<String>() { (resolve, reject) in
             actionWasCalled = true
@@ -21,194 +21,151 @@ class PledgeTests : XCTestCase {
         XCTAssertTrue(actionWasCalled)
     }
     
-    func testWhenActionCallsResolveImmediatelyThenIsTriggeredAsSoonAsItIsAdded(){
+    func testThenClosuresAreResolvedImmediatleyWhenThePledgeIsAlreadyResolved(){
         var wasCalled = false
         let expectedString = "12383y3461634"
-        Pledge() { resolve, reject in resolve(value: expectedString) }
-            .then { value in
+        Pledge() { resolve, reject in
+            resolve(value: expectedString)
+            }.then { value in
                 wasCalled = true
                 XCTAssertEqual(expectedString, value)
         }
         XCTAssertTrue(wasCalled)
     }
-    
-    func testWhenActionCallsResolveDelayedMultipleThensAreTriggeredAsSoonAsTheyAreAddedExactlyOnce(){
-        var then1CallCount = 0
-        var then2CallCount = 0
-        var then3CallCount = 0
+
+    func testThenClosuresAreNotCalledUntilThePledgeResolves() {
+        var thenCallCounters = [0, 0, 0]
         let expectedString = "asdfsd"
-        var resolveCall : Pledge<String>.Resolve?  = nil
-        Pledge() { resolve, reject in
-            resolveCall = resolve
-            }.then { value in
-                then1CallCount++
-                XCTAssertEqual(expectedString, value)
-            }.then { value in
-                then2CallCount++
-                XCTAssertEqual(expectedString, value)
-            }.then { value in
-                then3CallCount++
-                XCTAssertEqual(expectedString, value)
+        let pledge = Pledge<String>()
+        pledge.then { value in
+            thenCallCounters[0]++
+            XCTAssertEqual(expectedString, value)
+        }.then { value in
+            thenCallCounters[1]++
+            XCTAssertEqual(expectedString, value)
+        }.then { value in
+            thenCallCounters[2]++
+            XCTAssertEqual(expectedString, value)
         }
-        
-        XCTAssertEqual(0, then1CallCount)
-        XCTAssertEqual(0, then2CallCount)
-        XCTAssertEqual(0, then3CallCount)
-        
-        assertNotNil(resolveCall) {
-            withValue in
-            withValue(value: expectedString)
+
+        for callCount in thenCallCounters {
+            XCTAssertEqual(0, callCount)
         }
+
+        pledge.resolve(value: expectedString)
         
-        XCTAssertEqual(1, then1CallCount)
-        XCTAssertEqual(1, then2CallCount)
-        XCTAssertEqual(1, then3CallCount)
+        for callCount in thenCallCounters {
+            XCTAssertEqual(1, callCount)
+        }
     }
     
-    func testWhenAPledgeIsResolvedASecondTimeNoThensAreCalledBecauseThePledgeWasAlreadyFulfilled(){
-        var then1CallCount = 0
+    func testWhenAPledgeIsResolvedASecondTimeThenClosuresAreNotCalled_PledgesOnlyFulfillOnce(){
+        var thenCallCount = 0
         let expectedString = "3423"
-        var resolveCall : Pledge<String>.Resolve?  = nil
-        Pledge()
-            { resolve, reject in
-                resolveCall = resolve
-            }.then { value in
-                then1CallCount++
-                XCTAssertEqual(expectedString, value)
+        var pledge = Pledge<String>().then { value in
+            thenCallCount++
+            XCTAssertEqual(expectedString, value)
         }
+
+        pledge.resolve(value: expectedString)
+        pledge.resolve(value: "Bad String")
+        pledge.resolve(value: "A second bad String")
         
-        assertNotNil(resolveCall) {
-            withValue in
-            withValue(value: expectedString)
-            withValue(value: "Bad String")
-            withValue(value: "A second bad String")
-        }
-        
-        XCTAssertEqual(1, then1CallCount)
+        XCTAssertEqual(1, thenCallCount)
     }
-    
-    func testWhenActionCallsRejectImmediatelyFailIsTriggeredAsSoonAsItIsAdded(){
-        var error1CallCount = 0
-        var error2CallCount = 0
-        var error3CallCount = 0
-        
+
+    func testFailCallsAreResolvedImmediatelyWhenThePledgeIsAlreadyInError() {
+        var errorCallCounters = [0, 0, 0]
+
         let expectedError = newError("38hfehf", code: 2)
-        Pledge<Int>() { resolve, reject in reject(error: expectedError) }
-            .fail { error in
-                error1CallCount++
-                XCTAssertEqual(expectedError, error)
-            }            .fail { error in
-                error2CallCount++
-                XCTAssertEqual(expectedError, error)
-            }            .fail { error in
-                error3CallCount++
-                XCTAssertEqual(expectedError, error)
+        Pledge<Int>() { resolve, reject in
+            reject(error: expectedError)
+        }.fail { error in
+            errorCallCounters[0]++
+            XCTAssertEqual(expectedError, error)
+        }.fail { error in
+            errorCallCounters[1]++
+            XCTAssertEqual(expectedError, error)
+        }.fail { error in
+            errorCallCounters[2]++
+            XCTAssertEqual(expectedError, error)
         }
-        
-        XCTAssertEqual(1, error1CallCount)
-        XCTAssertEqual(1, error2CallCount)
-        XCTAssertEqual(1, error3CallCount)
+
+        for callCount in errorCallCounters {
+            XCTAssertEqual(1, callCount)
+        }
     }
     
-    func testWhenActionCallsRejectDelayedMultipleThensAreTriggeredAsSoonRejectIsCalledExactlyOnce(){
-        var then1CallCount = 0
-        var then2CallCount = 0
-        var then3CallCount = 0
+    func testFailClosuresAreNotCalledUntilThePledgeRejects(){
+        var errorCallCounters = [0, 0, 0]
         let expectedError = newError("asdfsd", code: 3)
-        var rejectCall : Pledge.Reject?  = nil
-        Pledge<Double>() { resolve, reject in
-            rejectCall = reject
-            }.fail { value in
-                then1CallCount++
+        let pledge = Pledge<Double>().fail { value in
+                errorCallCounters[0]++
                 XCTAssertEqual(expectedError, value)
             }.fail{ value in
-                then2CallCount++
+                errorCallCounters[1]++
                 XCTAssertEqual(expectedError, value)
             }.fail{ value in
-                then3CallCount++
+                errorCallCounters[2]++
                 XCTAssertEqual(expectedError, value)
         }
-        
-        XCTAssertEqual(0, then1CallCount)
-        XCTAssertEqual(0, then2CallCount)
-        XCTAssertEqual(0, then3CallCount)
-        
-        assertNotNil(rejectCall){
-            rejectCall in
-            rejectCall(error: expectedError)
+
+        for callCount in errorCallCounters {
+            XCTAssertEqual(0, callCount)
         }
         
-        XCTAssertEqual(1, then1CallCount)
-        XCTAssertEqual(1, then2CallCount)
-        XCTAssertEqual(1, then3CallCount)
+        pledge.reject(error: expectedError)
+
+        for callCount in errorCallCounters {
+            XCTAssertEqual(1, callCount)
+        }
     }
     
     func testWhenAPledgeIsRejectedASecondTimeNoFailesAreCalledBecauseThePledgeWasAlreadyBroken(){
         var failCallCount = 0
         let expectedError = newError("3423", code: 4)
-        var rejectCall : Pledge.Reject?  = nil
-        Pledge<Int>()
-            { resolve, reject in
-                rejectCall = reject
-            }.fail { value in
-                failCallCount++
-                XCTAssertEqual(expectedError, value)
+        let pledge = Pledge<Int>().fail { value in
+            failCallCount++
+            XCTAssertEqual(expectedError, value)
         }
         
-        assertNotNil(rejectCall) {
-            withValue in
-            withValue(error: expectedError)
-            withValue(error: newError("Bad String", code: 5))
-            withValue(error: newError("A second bad String", code: 6))
-        }
+        pledge.reject(error: expectedError)
+        pledge.reject(error: newError("Bad String", code: 5))
+        pledge.reject(error: newError("A second bad String", code: 6))
         
         XCTAssertEqual(1, failCallCount)
     }
     
-    func testIfRejectIsCalledAfterResolveFailesAreNotInformed(){
+    func testIfRejectIsCalledAfterResolveFailClosuresAreNotInformed(){
         var failCallCount = 0
-        var resolveCall : Pledge<Int>.Resolve?  = nil
-        var rejectCall : Pledge.Reject?  = nil
-        Pledge<Int>()
-            { resolve, reject in
-                resolveCall = resolve
-                rejectCall = reject
-            }.fail { error in
-                failCallCount++
-                return
+        let pledge = Pledge<Int>().fail { error in
+            failCallCount++
+            return
         }
         
-        assertNotNil(resolveCall){
-            resolveCall in
-            resolveCall(value: 384)
-        }
-        assertNotNil(rejectCall){
-            rejectCall in
-            rejectCall(error: newError("OH NO", code: 7))
-        }
+        pledge.resolve(value: 384)
+        pledge.reject(error: newError("OH NO", code: 7))
         
         XCTAssertEqual(0, failCallCount)
     }
     
-    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsTiny() {
+    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsShort() {
         let failExpectation = expectationWithDescription("fail occurred")
         let startTime = NSDate()
-        Pledge<Int> { resolve, reject in
-            }.fail { error in
-                let duration = NSDate().timeIntervalSinceDate(startTime)
-                failExpectation.fulfill()
-                XCTAssert( duration >= 0.01, "Duration was \(duration)")
-                assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
+        Pledge<Int>().fail { error in
+            let duration = NSDate().timeIntervalSinceDate(startTime)
+            failExpectation.fulfill()
+            XCTAssert( duration >= 0.01, "Duration was \(duration)")
+            assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
         }
         
         waitForExpectationsWithTimeout(0.05, nil)
     }
     
-    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutCanBeChanged() {
+    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_TimeoutCanBeChanged() {
         let failExpectation = expectationWithDescription("fail occurred")
         let startTime = NSDate()
-        Pledge<Int>(timeout: 0.5) { resolve, reject in
-            }.fail { error in
+        Pledge<Int>(timeout: 0.5).fail { error in
                 let duration = NSDate().timeIntervalSinceDate(startTime)
                 failExpectation.fulfill()
                 XCTAssert( duration >= 0.5, "Duration was \(duration)")
@@ -388,7 +345,7 @@ class PledgeTests : XCTestCase {
     }
     
     
-    func testPledgeAllCanResolveWithDoubleTuple(){
+    func testAllCanResolveWithDoubleTuple(){
         let value1 = 3684.9
         let value2 = "plops"
         var resolve1 : Pledge<Double>.Resolve? = nil
@@ -412,7 +369,7 @@ class PledgeTests : XCTestCase {
         assertEquals(1, thenCallCount)
     }
     
-    func testPledgeAllCanRejectInFailFastModeWithDoubleTuple(){
+    func testAllCanRejectInFailFastModeWithDoubleTuple(){
         var reject2 : Pledge<String>.Reject? = nil
         let pledge1 = Pledge<Int>(){ resolve, reject in }
         let pledge2 = Pledge<String>(){ resolve, reject in reject2 = reject }

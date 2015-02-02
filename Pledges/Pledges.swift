@@ -66,22 +66,31 @@ public class Pledge <T> : Promise {
     public typealias Resolve = (value: T) -> Void
     public typealias Reject = (error : NSError) -> Void
     public typealias Action = (resolve : Resolve, reject : Reject) -> Void
-    
-    let action : Action
-    
+
+    public private(set) var resolve : Resolve = { value in return }
+    public private(set) var reject : Reject = { error in return }
+    private let action : Action
     private var thenQueue = [Resolve]()
     private var failQueue = [Reject]()
     private var potentialResult : T?
     private var potentialError : NSError?
     private var failWasHandled = false
     
+    public convenience init() {
+        self.init({reject, resolve in return })
+    }
+    
     public convenience init(action: Action){
         self.init(timeout: 0.01, action: action)
     }
     
+    public convenience init(timeout: Double, timeoutQueue: dispatch_queue_t = dispatch_get_main_queue()){
+        self.init(timeout: timeout, action: {reject, resolve in return })
+    }
+    
     public init(timeout: Double, timeoutQueue: dispatch_queue_t = dispatch_get_main_queue(), action : Action) {
         self.action = action
-        let handleResolution : Resolve = { (value : T) in
+        self.resolve = { (value : T) in
             self.potentialResult = value
             
             for then in self.thenQueue {
@@ -89,8 +98,7 @@ public class Pledge <T> : Promise {
             }
             self.thenQueue.removeAll(keepCapacity: false)
         }
-        
-        let handleError : Reject = { (error : NSError ) in
+        self.reject = { (error : NSError ) in
             if self.potentialResult == nil {
                 let hasNotAlreadyFailed = self.potentialError == nil
                 if hasNotAlreadyFailed && self.failQueue.count == 0 {
@@ -109,10 +117,10 @@ public class Pledge <T> : Promise {
             }
         }
         
-        action(resolve : handleResolution, reject: handleError)
+        action(resolve : self.resolve, reject: self.reject)
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * 1000000000)), timeoutQueue) {
             if self.potentialResult == nil && self.potentialError == nil {
-                handleError(error: Error("Pledge did not resolve or reject before timeout of \(timeout) second.", 2))
+                self.reject(error: Error("Pledge did not resolve or reject before timeout of \(timeout) second.", 2))
             }
         }
     }
