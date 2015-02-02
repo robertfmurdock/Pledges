@@ -104,7 +104,7 @@ public class Pledge <T> : Promise {
                 if hasNotAlreadyFailed && self.failQueue.count == 0 {
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout * 1000000000)), timeoutQueue) {
                         if !self.failWasHandled {
-                            pledgeFallbackReject(error: Error("Uncaught Pledge failure: \(error.description)", 12, userInfo: error.userInfo))
+                            pledgeFallbackReject(error: Error("Uncaught Pledge failure: \(error.localizedDescription)", 12, userInfo: error.userInfo))
                         }
                     }
                 }
@@ -142,7 +142,7 @@ public class Pledge <T> : Promise {
         return Pledge<K> { resolveAgain, rejectAgain in
             self.then { value in resolveAgain(value: convert(value: value)) }
             self.fail { error in
-                rejectAgain(error: wrap(errorWrapper + error.description, error)) }
+                rejectAgain(error: wrapError(errorWrapper + error.localizedDescription, error)) }
         }
     }
     
@@ -155,11 +155,11 @@ public class Pledge <T> : Promise {
             self.then { value in
                 let pledge = convert(value: value)
                 pledge.then(resolveAgain).fail { error in
-                    rejectAgain(error: wrap(errorWrapper, error))
+                    rejectAgain(error: wrapError(errorWrapper, error))
                 }
             }
             self.fail { error in
-                rejectAgain(error: wrap(errorWrapper, error))
+                rejectAgain(error: wrapError(errorWrapper, error))
             }
         }
     }
@@ -171,7 +171,7 @@ public class Pledge <T> : Promise {
     public func thenPledge<K>(errorWrapper: String, convert: (value: T, resolve : Pledge<K>.Resolve, reject : Pledge<K>.Reject) -> Void) -> Pledge<K> {
         return Pledge<K> { resolveAgain, rejectAgain in
             self.then { value in convert(value: value, resolve: resolveAgain, rejectAgain) }
-            self.fail { error in rejectAgain(error: wrap(errorWrapper, error)) }
+            self.fail { error in rejectAgain(error: wrapError(errorWrapper, error)) }
         }
     }
     
@@ -314,13 +314,13 @@ private func connectPledges<T>(failFast: Bool, pledges : [Pledge<T>], errorWrapp
     }
 }
 
-private func wrap(message: String, error: NSError) -> NSError {
+public func wrapError(message: String, error: NSError) -> NSError {
     if message == "" {
         return error
     } else {
         var userInfo = error.userInfo ?? [:]
         userInfo[NSUnderlyingErrorKey] = error
-        return Error(message + error.description, error.code, userInfo: userInfo)
+        return Error(message + error.localizedDescription, error.code, userInfo: userInfo)
     }
 }
 

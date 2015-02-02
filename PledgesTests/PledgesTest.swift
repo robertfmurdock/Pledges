@@ -181,7 +181,7 @@ class PledgeTests : XCTestCase {
         let originalFallback = pledgeFallbackReject
         pledgeFallbackReject = { error in
             printExpectation.fulfill()
-            assertEquals("Uncaught Pledge failure: \(expectedError)", error.localizedDescription)
+            assertEquals("Uncaught Pledge failure: \(expectedError.localizedDescription)", error.localizedDescription)
         }
         Pledge<Int>.reject(expectedError)
         waitForExpectationsWithTimeout(0.01, nil)
