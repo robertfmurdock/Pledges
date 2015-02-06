@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   s.name = 'Pledges'
   s.version = '1.0'
   s.social_media_url = 'https://twitter.com/zeGreatRoB'
-  s.homepage = 'http://robertfmurdock.github.io'
+  s.homepage = 'http://www.github.com/robertfmurdock/Pledges'
   s.authors = { 'Rob Murdock' => 'rmurdock@pillartechnology.com' }
   s.source = { :git => 'https://github.com/robertfmurdock/Pledges.git', :tag => s.version }
   s.license = 'MIT'
