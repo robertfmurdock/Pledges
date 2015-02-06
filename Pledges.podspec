@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Pledges'
-  s.version = '0.1'
+  s.version = '1.0'
   s.social_media_url = 'https://twitter.com/zeGreatRoB'
   s.homepage = 'http://robertfmurdock.github.io'
   s.authors = { 'Rob Murdock' => 'rmurdock@pillartechnology.com' }
