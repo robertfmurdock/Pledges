@@ -6,4 +6,4 @@ A simple promise implementation for Swift.
 
 Feedback and pull requests welcome.
 
-So you say you want documentation? ;-) I'm working to make the [a unit tests](PledgesTests/PledgesTest.swift) into highly readable examples. If you have any questions, ask! I can use those to make sure new examples are added that make things clearer.
+So you say you want documentation? ;-) I'm working to make the [unit tests](PledgesTests/PledgesTest.swift) into highly readable examples. If you have any questions, ask! I can use those to make sure new examples are added that make things clearer.
