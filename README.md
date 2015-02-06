@@ -14,7 +14,7 @@ This library includes a few things I adore about the promise pattern:
 - That said, Pledges is fully compatible with returning a nil value as a success if you like!
 eg.
 
-    Pledge\<String?\>()
+        Pledge\<String?\>()
         
 - You decide what your Pledge should return!
 
