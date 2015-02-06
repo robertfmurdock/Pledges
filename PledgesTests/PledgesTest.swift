@@ -13,7 +13,15 @@ import Pledges
 
 class PledgeTests : XCTestCase {
     
-    func testWhenCreatingAPromiseTheGivenActionIsCalledImmediately() {
+    func testNewPledgesAreCreatedWithAClosureThatIsCalledImmediately() {
+        var actionWasCalled = false
+        Pledge<String>({ (resolve, reject) in
+            actionWasCalled = true
+        })
+        XCTAssertTrue(actionWasCalled)
+    }
+    
+    func testNewPledgesCanBeCreatedWithTrailingClosuresToo() {
         var actionWasCalled = false
         Pledge<String>() { (resolve, reject) in
             actionWasCalled = true
@@ -21,7 +29,7 @@ class PledgeTests : XCTestCase {
         XCTAssertTrue(actionWasCalled)
     }
     
-    func testThenClosuresAreResolvedImmediatleyWhenThePledgeIsAlreadyResolved(){
+    func testThenClosuresAreResolvedImmediatelyWhenThePledgeIsAlreadyResolved(){
         var wasCalled = false
         let expectedString = "12383y3461634"
         Pledge() { resolve, reject in
