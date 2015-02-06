@@ -29,7 +29,7 @@ class PledgeTests : XCTestCase {
         XCTAssertTrue(actionWasCalled)
     }
     
-    func testThenClosuresAreResolvedImmediatelyWhenThePledgeIsAlreadyResolved(){
+    func testResolveThePledgeUsingTheResolveCallbackAndAnyThenClosuresWillResolveSubsequently(){
         var wasCalled = false
         let expectedString = "12383y3461634"
         Pledge() { resolve, reject in
@@ -40,8 +40,23 @@ class PledgeTests : XCTestCase {
         }
         XCTAssertTrue(wasCalled)
     }
+    
+    func testTheResolveCallbackIsAlsoAccessibleViaThePledgeItself(){
+        var wasCalled = false
+        let expectedString = "12383y3461634"
+        let pledge = Pledge<String>()
+        XCTAssertFalse(wasCalled)
 
-    func testThenClosuresAreNotCalledUntilThePledgeResolves() {
+        pledge.resolve(value: expectedString)
+        pledge.then { value in
+                wasCalled = true
+                XCTAssertEqual(expectedString, value)
+        }
+        
+        XCTAssertTrue(wasCalled)
+    }
+
+    func testMultipleThenClosuresAreNotCalledUntilThePledgeResolves() {
         var thenCallCounters = [0, 0, 0]
         let expectedString = "asdfsd"
         let pledge = Pledge<String>()
@@ -155,79 +170,6 @@ class PledgeTests : XCTestCase {
         pledge.reject(error: newError("OH NO", code: 7))
         
         XCTAssertEqual(0, failCallCount)
-    }
-    
-    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsShort() {
-        let failExpectation = expectationWithDescription("fail occurred")
-        let startTime = NSDate()
-        Pledge<Int>().fail { error in
-            let duration = NSDate().timeIntervalSinceDate(startTime)
-            failExpectation.fulfill()
-            XCTAssert( duration >= 0.01, "Duration was \(duration)")
-            assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
-        }
-        
-        waitForExpectationsWithTimeout(0.05, nil)
-    }
-    
-    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_TimeoutCanBeChanged() {
-        let failExpectation = expectationWithDescription("fail occurred")
-        let startTime = NSDate()
-        Pledge<Int>(timeout: 0.5).fail { error in
-                let duration = NSDate().timeIntervalSinceDate(startTime)
-                failExpectation.fulfill()
-                XCTAssert( duration >= 0.5, "Duration was \(duration)")
-                assertEquals("Pledge did not resolve or reject before timeout of 0.5 second.", error.localizedDescription)
-        }
-        
-        waitForExpectationsWithTimeout(0.6, nil)
-    }
-    
-    func testPledgeThatDoesNotFailShortlyAfterBeingRejectedWillAutomaticallyUseFallback(){
-        let printExpectation = expectationWithDescription("fail occurred")
-        let expectedError = newError("Oh no!", code: 8)
-        let originalFallback = pledgeFallbackReject
-        pledgeFallbackReject = { error in
-            printExpectation.fulfill()
-            assertEquals("Uncaught Pledge failure: \(expectedError.localizedDescription)", error.localizedDescription)
-        }
-        Pledge<Int>.reject(expectedError)
-        waitForExpectationsWithTimeout(0.01, nil)
-        pledgeFallbackReject = originalFallback
-    }
-    
-    func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndResolveOnMainQueue(){
-        let expectedValue = "Amazing answer from another wooooorld!"
-        let resolveExpectation = expectationWithDescription("resolve occurred")
-        let thenExpectation = expectationWithDescription("then occurred")
-        
-        let action : Pledge<String>.Action = { resolve, reject in
-            resolveExpectation.fulfill()
-            resolve(value: expectedValue)
-        }
-        let pledge = runOnBackground(action).then { value in
-            thenExpectation.fulfill()
-            assertEquals(expectedValue, value)
-        }
-        
-        waitForExpectationsWithTimeout(10, nil)
-    }
-    
-    func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndRejectOnMainQueue(){
-        let expectedValue = newError("Amazing answer from another wooooorld!", code: 10)
-        let resolveExpectation = expectationWithDescription("resolve occurred")
-        let failExpectation = expectationWithDescription("fail occurred")
-        
-        let action : Pledge<String>.Action = { resolve, reject in
-            resolveExpectation.fulfill()
-            reject(error: expectedValue)
-        }
-        let pledge = runOnBackground(action).fail { value in
-            failExpectation.fulfill()
-            assertEquals(expectedValue, value)
-        }
-        
-        waitForExpectationsWithTimeout(10, nil)
     }
     
     func testAllWillResolveWhenAllPromisesCompleteImmediately(){
@@ -477,6 +419,79 @@ class PledgeTests : XCTestCase {
         assertEquals(0, failCallCount)
     }
     
+    func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndRejectOnMainQueue(){
+        let expectedValue = newError("Amazing answer from another wooooorld!", code: 10)
+        let resolveExpectation = expectationWithDescription("resolve occurred")
+        let failExpectation = expectationWithDescription("fail occurred")
+        
+        let action : Pledge<String>.Action = { resolve, reject in
+            resolveExpectation.fulfill()
+            reject(error: expectedValue)
+        }
+        let pledge = runOnBackground(action).fail { value in
+            failExpectation.fulfill()
+            assertEquals(expectedValue, value)
+        }
+        
+        waitForExpectationsWithTimeout(10, nil)
+    }
+
+    
+    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsShort() {
+        let failExpectation = expectationWithDescription("fail occurred")
+        let startTime = NSDate()
+        Pledge<Int>().fail { error in
+            let duration = NSDate().timeIntervalSinceDate(startTime)
+            failExpectation.fulfill()
+            XCTAssert( duration >= 0.01, "Duration was \(duration)")
+            assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
+        }
+        
+        waitForExpectationsWithTimeout(0.05, nil)
+    }
+    
+    func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_TimeoutCanBeChanged() {
+        let failExpectation = expectationWithDescription("fail occurred")
+        let startTime = NSDate()
+        Pledge<Int>(timeout: 0.5).fail { error in
+            let duration = NSDate().timeIntervalSinceDate(startTime)
+            failExpectation.fulfill()
+            XCTAssert( duration >= 0.5, "Duration was \(duration)")
+            assertEquals("Pledge did not resolve or reject before timeout of 0.5 second.", error.localizedDescription)
+        }
+        
+        waitForExpectationsWithTimeout(0.6, nil)
+    }
+    
+    func testPledgeThatDoesNotFailShortlyAfterBeingRejectedWillAutomaticallyUseFallback(){
+        let printExpectation = expectationWithDescription("fail occurred")
+        let expectedError = newError("Oh no!", code: 8)
+        let originalFallback = pledgeFallbackReject
+        pledgeFallbackReject = { error in
+            printExpectation.fulfill()
+            assertEquals("Uncaught Pledge failure: \(expectedError.localizedDescription)", error.localizedDescription)
+        }
+        Pledge<Int>.reject(expectedError)
+        waitForExpectationsWithTimeout(0.01, nil)
+        pledgeFallbackReject = originalFallback
+    }
+    
+    func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndResolveOnMainQueue(){
+        let expectedValue = "Amazing answer from another wooooorld!"
+        let resolveExpectation = expectationWithDescription("resolve occurred")
+        let thenExpectation = expectationWithDescription("then occurred")
+        
+        let action : Pledge<String>.Action = { resolve, reject in
+            resolveExpectation.fulfill()
+            resolve(value: expectedValue)
+        }
+        let pledge = runOnBackground(action).then { value in
+            thenExpectation.fulfill()
+            assertEquals(expectedValue, value)
+        }
+        
+        waitForExpectationsWithTimeout(10, nil)
+    }
 }
 
 func newError(description: String, #code: Int) -> NSError {
