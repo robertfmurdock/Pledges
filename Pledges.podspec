@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.authors = { 'Rob Murdock' => 'rmurdock@pillartechnology.com' }
   s.source = { :git => 'https://github.com/robertfmurdock/Pledges.git', :tag => s.version }
   s.license = 'MIT'
-  s.summary = 'Pledges is a simple promise implementation for Swift! Designed around each of flow and piping.'
+  s.summary = 'Pledges: the simple Swift promise library! Designed around ease of flow and composability.'
   s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.10'
 
