@@ -15,7 +15,7 @@ class PledgeTests : XCTestCase {
     
     func testNewPledgesAreCreatedWithAClosureThatIsCalledImmediately() {
         var actionWasCalled = false
-        Pledge<String>({ (resolve, reject) in
+        let _ = Pledge<String>(action: { (resolve, reject) in
             actionWasCalled = true
         })
         XCTAssertTrue(actionWasCalled)
@@ -23,7 +23,7 @@ class PledgeTests : XCTestCase {
     
     func testNewPledgesCanBeCreatedWithTrailingClosuresToo() {
         var actionWasCalled = false
-        Pledge<String>() { (resolve, reject) in
+        let _ = Pledge<String>() { (resolve, reject) in
             actionWasCalled = true
         }
         XCTAssertTrue(actionWasCalled)
@@ -85,7 +85,7 @@ class PledgeTests : XCTestCase {
     func testWhenAPledgeIsResolvedASecondTimeThenClosuresAreNotCalled_PledgesOnlyFulfillOnce(){
         var thenCallCount = 0
         let expectedString = "3423"
-        var pledge = Pledge<String>().then { value in
+        let pledge = Pledge<String>().then { value in
             thenCallCount++
             XCTAssertEqual(expectedString, value)
         }
@@ -233,7 +233,7 @@ class PledgeTests : XCTestCase {
         let pledges : [Promise] = [pledge1, pledge2, pledge3]
         
         var failCallCount=0
-        let allPledge = all(failFast: true, promises: pledges)
+        let allPledge = all(true, promises: pledges)
         let expectedError = newError("oh noes a kid kicked it", code: 11)
         allPledge.fail { error in
             failCallCount++
@@ -325,7 +325,7 @@ class PledgeTests : XCTestCase {
         let pledge2 = Pledge<String>(){ resolve, reject in reject2 = reject }
         
         var failCallCount=0
-        let allPledge = all(failFast: true, promises: (pledge1, pledge2))
+        let allPledge = all(true, promises: (pledge1, pledge2))
         let expectedError = newError("oh noes a kid kicked it", code: 16)
         allPledge.fail { error in
             failCallCount++
@@ -372,7 +372,7 @@ class PledgeTests : XCTestCase {
         let pledge3 = Pledge<Double>(){ resolve, reject in }
         
         var failCallCount=0
-        let allPledge = all(failFast: true, promises: (pledge1, pledge2, pledge3))
+        let allPledge = all(true, promises: (pledge1, pledge2, pledge3))
         let expectedError = newError("oh noes a kid kicked it", code: 19)
         allPledge.fail { error in
             failCallCount++
@@ -387,7 +387,6 @@ class PledgeTests : XCTestCase {
         var failCallCount = 0
         var thenCallCount = 0
         let allPledge = all(promises: [Pledge<String>]())
-        let expectedError = "oh noes a kid kicked it"
         allPledge
             .then { value in
                 assertEquals(0, value.count)
@@ -405,7 +404,7 @@ class PledgeTests : XCTestCase {
         var failCallCount = 0
         var thenCallCount = 0
         let allPledge = all(promises: [Promise]())
-        let expectedError = "oh noes a kid kicked it"
+
         allPledge
             .then { value in
                 assertEquals(0, value.count)
@@ -428,14 +427,13 @@ class PledgeTests : XCTestCase {
             resolveExpectation.fulfill()
             reject(error: expectedValue)
         }
-        let pledge = runOnBackground(action).fail { value in
+        let _ = runOnBackground(action).fail { value in
             failExpectation.fulfill()
             assertEquals(expectedValue, value)
         }
         
-        waitForExpectationsWithTimeout(10, nil)
+        waitForExpectationsWithTimeout(10, handler: nil)
     }
-
     
     func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsShort() {
         let failExpectation = expectationWithDescription("fail occurred")
@@ -447,7 +445,7 @@ class PledgeTests : XCTestCase {
             assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
         }
         
-        waitForExpectationsWithTimeout(0.05, nil)
+        waitForExpectationsWithTimeout(0.05, handler: nil)
     }
     
     func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_TimeoutCanBeChanged() {
@@ -460,7 +458,7 @@ class PledgeTests : XCTestCase {
             assertEquals("Pledge did not resolve or reject before timeout of 0.5 second.", error.localizedDescription)
         }
         
-        waitForExpectationsWithTimeout(0.6, nil)
+        waitForExpectationsWithTimeout(0.6, handler: nil)
     }
     
     func testPledgeThatDoesNotFailShortlyAfterBeingRejectedWillAutomaticallyUseFallback(){
@@ -472,7 +470,7 @@ class PledgeTests : XCTestCase {
             assertEquals("Uncaught Pledge failure: \(expectedError.localizedDescription)", error.localizedDescription)
         }
         Pledge<Int>.reject(expectedError)
-        waitForExpectationsWithTimeout(0.01, nil)
+        waitForExpectationsWithTimeout(0.01, handler: nil)
         pledgeFallbackReject = originalFallback
     }
     
@@ -485,15 +483,16 @@ class PledgeTests : XCTestCase {
             resolveExpectation.fulfill()
             resolve(value: expectedValue)
         }
-        let pledge = runOnBackground(action).then { value in
-            thenExpectation.fulfill()
-            assertEquals(expectedValue, value)
+        let _ = runOnBackground(action)
+            .then { value in
+                thenExpectation.fulfill()
+                assertEquals(expectedValue, value)
         }
         
-        waitForExpectationsWithTimeout(10, nil)
+        waitForExpectationsWithTimeout(10, handler: nil)
     }
 }
 
-func newError(description: String, #code: Int) -> NSError {
+func newError(description: String, code: Int) -> NSError {
     return NSError(domain: "PledgeTests", code: code, userInfo: [NSLocalizedDescriptionKey: description])
 }

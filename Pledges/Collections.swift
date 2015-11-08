@@ -24,7 +24,7 @@ public class IterableRoll<T : AnyObject> : SequenceType {
     }
     
     public func remove(item : T) {
-        for (index, itemCandidate) in enumerate(self.items) {
+        for (index, itemCandidate) in self.items.enumerate() {
             if itemCandidate === item {
                 items.removeAtIndex(index)
             }
@@ -36,8 +36,8 @@ public class IterableRoll<T : AnyObject> : SequenceType {
     }
 }
 
-public func containsObject<Seq : SequenceType where Seq.Generator.Element : AnyObject> (list : Seq, item : Seq.Generator.Element) -> Bool {
-    if let index = firstIndexOf(item, inList: list){
+public func containsObject<Seq : SequenceType where Seq.Generator.Element : AnyObject> (list : Seq, _ item : Seq.Generator.Element) -> Bool {
+    if let _ = firstIndexOf(item, inList: list){
         return true
     } else {
         return false
@@ -61,7 +61,7 @@ public func findIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.E
 }
 
 public func findWithIndexIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> (item: Seq.Generator.Element, index: Int)? {
-    for (index, candidate) in enumerate(list) {
+    for (index, candidate) in list.enumerate() {
         if matches(candidate) {
             return (candidate, index)
         }
@@ -70,7 +70,7 @@ public func findWithIndexIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Ge
 }
 
 public func firstIndexOf<Seq : SequenceType where Seq.Generator.Element : AnyObject> (item : Seq.Generator.Element, inList list : Seq) -> Int? {
-    for (index, candidate) in enumerate(list) {
+    for (index, candidate) in list.enumerate() {
         if candidate === item {
             return index
         }

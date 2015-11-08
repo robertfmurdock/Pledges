@@ -7,15 +7,15 @@
 //
 import XCTest
 
-public func assertEquals <T : Equatable> (expected: T, actual:T?, file: String = __FILE__, line: UInt = __LINE__ ) {
+public func assertEquals <T : Equatable> (expected: T, _ actual:T?, file: String = __FILE__, line: UInt = __LINE__ ) {
     XCTAssert(expected == actual, "Expected: \(expected) was not: \(actual)", file: file, line: line)
 }
 
-public func assertEquals <T : Equatable where T : Printable> (expected: T, actual:T, file: String = __FILE__, line: UInt = __LINE__ ) {
+public func assertEquals <T : Equatable where T : CustomStringConvertible> (expected: T, actual:T, file: String = __FILE__, line: UInt = __LINE__ ) {
     XCTAssert(expected == actual, "Expected: \(expected.description) was not: \(actual.description)", file: file, line: line)
 }
 
-public func assertEquals <T : Equatable where T : Printable> (expected: T, actual:T?, file: String = __FILE__, line: UInt = __LINE__ ) {
+public func assertEquals <T : Equatable where T : CustomStringConvertible> (expected: T, _ actual:T?, file: String = __FILE__, line: UInt = __LINE__ ) {
     XCTAssert(expected == actual, "Expected: \(expected.description) was not: \(actual?.description ?? nil)", file: file, line: line)
 }
 
@@ -23,7 +23,7 @@ public func assertEquals <T : Equatable, K> (expected: T, actual:K , file: Strin
     if let checkedActual = actual as? T {
         XCTAssert(expected == checkedActual, "Expected: \(expected) was not: \(checkedActual)", file: file, line: line)
     } else {
-        XCTFail("These were not of the same type.", file: file, line: line)
+        XCTFail("These were not of the same type. \(expected) \(actual)", file: file, line: line)
     }
 }
 
@@ -40,14 +40,14 @@ public func assertSame <T : AnyObject, K> (expected: T, actual: K!, file: String
 }
 
 public func assert <T : AnyObject> (expectedArray expected: Array<T>, hasSameContentsAs actual : Array<T>, file: String = __FILE__, line: UInt = __LINE__ ){
-    assertSimilarArrays(expected, actual, { expected, actual -> Bool in expected === actual }, file: file, line: line)
+    assertSimilarArrays(expected, actual: actual, file: file, line: line, checkSimilarity: { expected, actual -> Bool in expected === actual })
 }
 
 public func assert <T : Equatable> (expectedArray expected: Array<T>, hasEqualContentsAs actual : Array<T>, file: String = __FILE__, line: UInt = __LINE__ ){
-    assertSimilarArrays(expected, actual, { expected, actual -> Bool in  expected == actual }, file: file, line: line)
+    assertSimilarArrays(expected, actual: actual, file: file, line: line, checkSimilarity: { expected, actual -> Bool in  expected == actual })
 }
 
-private func assertSimilarArrays<T>(expected : Array<T>, actual : Array<T>, checkSimilarity: (T, T) -> Bool, file: String = __FILE__, line: UInt = __LINE__ ){
+private func assertSimilarArrays<T>(expected : Array<T>, actual : Array<T>, file: String = __FILE__, line: UInt = __LINE__, checkSimilarity: (T, T) -> Bool ){
     if(expected.count == actual.count){
         for index in 0 ..< expected.count {
             let expectedItem = expected[index]
@@ -64,9 +64,9 @@ public func assertEquals (expected: Double, actual : Double, delta: Double, file
 }
 
 public func assertEqualsImplementation <T : Equatable> (original : T, equal : T, notEqualObjects : [T], file: String = __FILE__, line: UInt = __LINE__) {
-    assertEquals(original, original, file: file, line: line)
-    assertEquals(original, equal, file: file, line: line)
-    assertEquals(equal, original, file: file, line: line)
+    assertEquals(original, actual: original, file: file, line: line)
+    assertEquals(original, actual: equal, file: file, line: line)
+    assertEquals(equal, actual: original, file: file, line: line)
     
     for notEqual in notEqualObjects {
         XCTAssert(original != notEqual, "", file: file, line: line)
@@ -74,7 +74,7 @@ public func assertEqualsImplementation <T : Equatable> (original : T, equal : T,
     }
 }
 
-public func assertNotNil <T>( candidate : T?, _ andContinue : (withValue : T) -> Void = { value in return }, file: String = __FILE__, line: UInt = __LINE__) {
+public func assertNotNil <T>( candidate : T?, file: String = __FILE__, line: UInt = __LINE__, _ andContinue : (withValue : T) -> Void = { value in return }) {
     if let value = candidate {
         andContinue(withValue: value)
     } else {
@@ -90,7 +90,7 @@ public func assert<T : AnyObject>(collection: [T], hasOnlyThisObject expected: T
     }
 }
 
-public func assertHasOneElement<Seq : SequenceType>(collection: Seq, _ andContinue : (withValue : Seq.Generator.Element) -> Void = { value in return }, file: String = __FILE__, line: UInt = __LINE__) {
+public func assertHasOneElement<Seq : SequenceType>(collection: Seq, file: String = __FILE__, line: UInt = __LINE__, _ andContinue : (withValue : Seq.Generator.Element) -> Void = { value in return }) {
     
     let array = Array(collection)
     if array.count == 1 {
@@ -100,7 +100,7 @@ public func assertHasOneElement<Seq : SequenceType>(collection: Seq, _ andContin
     }
 }
 
-public func assertHasOneOfType<T, Seq : SequenceType>(values: Seq, _ andContinue : (withValue : T) -> Void = { value in return }, file: String = __FILE__, line: UInt = __LINE__) {
+public func assertHasOneOfType<T, Seq : SequenceType>(values: Seq, file: String = __FILE__, line: UInt = __LINE__, _ andContinue : (withValue : T) -> Void = { value in return }) {
     for value in values {
         if let value = value as? T {
             andContinue(withValue: value)
@@ -111,7 +111,7 @@ public func assertHasOneOfType<T, Seq : SequenceType>(values: Seq, _ andContinue
 }
 
 public struct ReturnWhen<Args, Return> {
-    typealias WhenMatches = (args: Args) -> Bool
+    public typealias WhenMatches = (args: Args) -> Bool
     public let value: Return
     public let when: [WhenMatches]
 }
@@ -131,7 +131,7 @@ public struct Spy<Args, Return> {
         self.standardArgsComparators = argComparators
     }
     
-    public mutating func call(#args: Args) -> Return {
+    public mutating func call(args args: Args) -> Return {
         calls.append(args)
         
         for returnWhen in returnValuesWhen {
@@ -184,7 +184,7 @@ public struct Spy<Args, Return> {
     }
     
     public func verify(wasCalledWithArgsThatMatch argsMatchers: [WhenMatches], file: String = __FILE__, line: UInt = __LINE__) {
-        XCTAssertTrue(isContainedIn(self.calls, allMatch(argsMatchers)),"Spy was not called with those args.", file: file, line: line)
+        XCTAssertTrue(isContainedIn(self.calls, that: allMatch(argsMatchers)),"Spy was not called with those args.", file: file, line: line)
     }
     
     public func isContainedIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> Bool {
@@ -196,7 +196,7 @@ public struct Spy<Args, Return> {
     }
     
     public func findWithIndexIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> (item: Seq.Generator.Element, index: Int)? {
-        for (index, candidate) in enumerate(list) {
+        for (index, candidate) in list.enumerate() {
             if matches(candidate) {
                 return (candidate, index)
             }

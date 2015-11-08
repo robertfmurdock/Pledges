@@ -24,7 +24,7 @@ class IterableRollTest : XCTestCase {
     }
     
     func testAdd()  {
-        var bunch = IterableRoll<StubObject>()
+        let bunch = IterableRoll<StubObject>()
         let items = [ StubObject(), StubObject(), StubObject() ]
         for  item in items {
             bunch.add(item)
@@ -33,7 +33,7 @@ class IterableRollTest : XCTestCase {
     }
     
     func testRemove()  {
-        var bunch = IterableRoll<StubObject>()
+        let bunch = IterableRoll<StubObject>()
         let object1 = StubObject()
         let object2 = StubObject()
         bunch.add(object1)
@@ -45,7 +45,7 @@ class IterableRollTest : XCTestCase {
     
     func testCanRemoveAndAddWhileIteratingSafely_AddedItemsAreNotIteratedOver()
     {
-        var bunch = IterableRoll<StubObject>()
+        let bunch = IterableRoll<StubObject>()
         let object1 = StubObject()
         let object2 = StubObject()
         

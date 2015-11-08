@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F44124CE3C8D88B9BF639265E716F4155747D626",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "F44124CE3C8D88B9BF639265E716F4155747D626" : 0,
+    "8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "9A5194AD-1AB1-48D2-81C6-919646FD1B65",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "F44124CE3C8D88B9BF639265E716F4155747D626" : "Pledges",
+    "8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6" : "ArmorTestKit"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Pledges",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Pledges.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:robertfmurdock\/ArmorTestKit.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "8316DA8BC0646A4B5EF49F2D45DF771C66ACF5A6"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:robertfmurdock\/Pledges.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F44124CE3C8D88B9BF639265E716F4155747D626"
+    }
+  ]
+}
