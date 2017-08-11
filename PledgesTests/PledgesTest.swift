@@ -33,7 +33,7 @@ class PledgeTests : XCTestCase {
         var wasCalled = false
         let expectedString = "12383y3461634"
         Pledge() { resolve, reject in
-            resolve(value: expectedString)
+            resolve(expectedString)
             }.then { value in
                 wasCalled = true
                 XCTAssertEqual(expectedString, value)
@@ -47,7 +47,7 @@ class PledgeTests : XCTestCase {
         let pledge = Pledge<String>()
         XCTAssertFalse(wasCalled)
 
-        pledge.resolve(value: expectedString)
+        pledge.resolve(expectedString)
         pledge.then { value in
                 wasCalled = true
                 XCTAssertEqual(expectedString, value)
@@ -61,13 +61,13 @@ class PledgeTests : XCTestCase {
         let expectedString = "asdfsd"
         let pledge = Pledge<String>()
         pledge.then { value in
-            thenCallCounters[0]++
+            thenCallCounters[0] += 1
             XCTAssertEqual(expectedString, value)
         }.then { value in
-            thenCallCounters[1]++
+            thenCallCounters[1] += 1
             XCTAssertEqual(expectedString, value)
         }.then { value in
-            thenCallCounters[2]++
+            thenCallCounters[2] += 1
             XCTAssertEqual(expectedString, value)
         }
 
@@ -75,7 +75,7 @@ class PledgeTests : XCTestCase {
             XCTAssertEqual(0, callCount)
         }
 
-        pledge.resolve(value: expectedString)
+        pledge.resolve(expectedString)
         
         for callCount in thenCallCounters {
             XCTAssertEqual(1, callCount)
@@ -86,13 +86,13 @@ class PledgeTests : XCTestCase {
         var thenCallCount = 0
         let expectedString = "3423"
         let pledge = Pledge<String>().then { value in
-            thenCallCount++
+            thenCallCount+=1
             XCTAssertEqual(expectedString, value)
         }
 
-        pledge.resolve(value: expectedString)
-        pledge.resolve(value: "Bad String")
-        pledge.resolve(value: "A second bad String")
+        pledge.resolve(expectedString)
+        pledge.resolve("Bad String")
+        pledge.resolve("A second bad String")
         
         XCTAssertEqual(1, thenCallCount)
     }
@@ -102,15 +102,15 @@ class PledgeTests : XCTestCase {
 
         let expectedError = newError("38hfehf", code: 2)
         Pledge<Int>() { resolve, reject in
-            reject(error: expectedError)
+            reject(expectedError)
         }.fail { error in
-            errorCallCounters[0]++
+            errorCallCounters[0] += 1
             XCTAssertEqual(expectedError, error)
         }.fail { error in
-            errorCallCounters[1]++
+            errorCallCounters[1] += 1
             XCTAssertEqual(expectedError, error)
         }.fail { error in
-            errorCallCounters[2]++
+            errorCallCounters[2] += 1
             XCTAssertEqual(expectedError, error)
         }
 
@@ -123,13 +123,13 @@ class PledgeTests : XCTestCase {
         var errorCallCounters = [0, 0, 0]
         let expectedError = newError("asdfsd", code: 3)
         let pledge = Pledge<Double>().fail { value in
-                errorCallCounters[0]++
+                errorCallCounters[0]+=1
                 XCTAssertEqual(expectedError, value)
             }.fail{ value in
-                errorCallCounters[1]++
+                errorCallCounters[1]+=1
                 XCTAssertEqual(expectedError, value)
             }.fail{ value in
-                errorCallCounters[2]++
+                errorCallCounters[2]+=1
                 XCTAssertEqual(expectedError, value)
         }
 
@@ -137,7 +137,7 @@ class PledgeTests : XCTestCase {
             XCTAssertEqual(0, callCount)
         }
         
-        pledge.reject(error: expectedError)
+        pledge.reject(expectedError)
 
         for callCount in errorCallCounters {
             XCTAssertEqual(1, callCount)
@@ -148,13 +148,13 @@ class PledgeTests : XCTestCase {
         var failCallCount = 0
         let expectedError = newError("3423", code: 4)
         let pledge = Pledge<Int>().fail { value in
-            failCallCount++
+            failCallCount+=1
             XCTAssertEqual(expectedError, value)
         }
         
-        pledge.reject(error: expectedError)
-        pledge.reject(error: newError("Bad String", code: 5))
-        pledge.reject(error: newError("A second bad String", code: 6))
+        pledge.reject(expectedError)
+        pledge.reject(newError("Bad String", code: 5))
+        pledge.reject(newError("A second bad String", code: 6))
         
         XCTAssertEqual(1, failCallCount)
     }
@@ -162,12 +162,12 @@ class PledgeTests : XCTestCase {
     func testIfRejectIsCalledAfterResolveFailClosuresAreNotInformed(){
         var failCallCount = 0
         let pledge = Pledge<Int>().fail { error in
-            failCallCount++
+            failCallCount+=1
             return
         }
         
-        pledge.resolve(value: 384)
-        pledge.reject(error: newError("OH NO", code: 7))
+        pledge.resolve(384)
+        pledge.reject(newError("OH NO", code: 7))
         
         XCTAssertEqual(0, failCallCount)
     }
@@ -176,16 +176,16 @@ class PledgeTests : XCTestCase {
         let value1 = 37
         let value2 = "Bobberino"
         let value3 = 9.78
-        let pledge1 = Pledge(){ resolve, reject in resolve(value: value1) }
-        let pledge2 = Pledge(){ resolve, reject in resolve(value: value2) }
-        let pledge3 = Pledge(){ resolve, reject in resolve(value: value3) }
+        let pledge1 = Pledge(){ resolve, reject in resolve(value1) }
+        let pledge2 = Pledge(){ resolve, reject in resolve(value2) }
+        let pledge3 = Pledge(){ resolve, reject in resolve(value3) }
         
         let pledges : [Promise] = [pledge1, pledge2, pledge3]
         
         var thenCallCount=0
         let allPledge = all(promises: pledges)
         allPledge.then { value in
-            thenCallCount++
+            thenCallCount+=1
             assertEquals(value1, value[0] as? Int)
             assertEquals(value2, value[1] as? String)
             assertEquals(value3, value[2] as? Double)
@@ -210,16 +210,16 @@ class PledgeTests : XCTestCase {
         var thenCallCount=0
         let allPledge = all(promises: pledges)
         allPledge.then { value in
-            thenCallCount++
+            thenCallCount+=1
             assertEquals(value1, value[0] as? Int)
             assertEquals(value2, value[1] as? String)
             assertEquals(value3, value[2] as? Double)
         }
         assertEquals(0, thenCallCount)
         
-        resolve2?(value: value2)
-        resolve1?(value: value1)
-        resolve3?(value: value3)
+        resolve2?(value2)
+        resolve1?(value1)
+        resolve3?(value3)
         
         assertEquals(1, thenCallCount)
     }
@@ -236,11 +236,11 @@ class PledgeTests : XCTestCase {
         let allPledge = all(true, promises: pledges)
         let expectedError = newError("oh noes a kid kicked it", code: 11)
         allPledge.fail { error in
-            failCallCount++
+            failCallCount += 1
             assertEquals(expectedError, error)
         }
         assertEquals(0, failCallCount)
-        reject2?(error: expectedError)
+        reject2?(expectedError)
         assertEquals(1, failCallCount)
     }
     
@@ -258,14 +258,14 @@ class PledgeTests : XCTestCase {
         let allPledge = all(promises: pledges)
         let expectedError = "[\noh noes\na kid\nkicked it\n]"
         allPledge.fail { error in
-            failCallCount++
+            failCallCount += 1
             assertEquals(expectedError, error.localizedDescription)
         }
         assertEquals(0, failCallCount)
-        reject2?(error: newError("a kid", code: 12))
-        reject1?(error: newError("oh noes", code: 13))
+        reject2?(newError("a kid", code: 12))
+        reject1?(newError("oh noes", code: 13))
         assertEquals(0, failCallCount)
-        reject3?(error: newError("kicked it", code: 14))
+        reject3?(newError("kicked it", code: 14))
         assertEquals(1, failCallCount)
     }
     
@@ -283,14 +283,14 @@ class PledgeTests : XCTestCase {
         let allPledge = all(promises: pledges)
         let expectedError = "[\noh noes a kid\nkicked it\n]"
         allPledge.fail { error in
-            failCallCount++
+            failCallCount+=1
             assertEquals(expectedError, error.localizedDescription)
         }
         assertEquals(0, failCallCount)
-        reject1?(error: newError("oh noes a kid", code: 15))
-        reject3?(error: newError("kicked it", code: 14))
+        reject1?(newError("oh noes a kid", code: 15))
+        reject3?(newError("kicked it", code: 14))
         assertEquals(0, failCallCount)
-        resolve2?(value: "lolz")
+        resolve2?("lolz")
         assertEquals(1, failCallCount)
     }
     
@@ -307,14 +307,14 @@ class PledgeTests : XCTestCase {
         var thenCallCount=0
         let allPledge = all(promises: (pledge1, pledge2))
         allPledge.then { value in
-            thenCallCount++
+            thenCallCount += 1
             assertEquals(value1, value.0)
             assertEquals(value2, value.1)
         }
         assertEquals(0, thenCallCount)
         
-        resolve2?(value: value2)
-        resolve1?(value: value1)
+        resolve2?(value2)
+        resolve1?(value1)
         
         assertEquals(1, thenCallCount)
     }
@@ -328,11 +328,11 @@ class PledgeTests : XCTestCase {
         let allPledge = all(true, promises: (pledge1, pledge2))
         let expectedError = newError("oh noes a kid kicked it", code: 16)
         allPledge.fail { error in
-            failCallCount++
+            failCallCount += 1
             assertEquals(expectedError, error)
         }
         assertEquals(0, failCallCount)
-        reject2?(error: expectedError)
+        reject2?(expectedError)
         assertEquals(1, failCallCount)
     }
     
@@ -351,16 +351,16 @@ class PledgeTests : XCTestCase {
         var thenCallCount=0
         let allPledge = all(promises: (pledge1, pledge2, pledge3))
         allPledge.then { value in
-            thenCallCount++
+            thenCallCount+=1
             assertEquals(value1, value.0)
             assertEquals(value2, value.1)
             assertEquals(value3, value.2)
         }
         assertEquals(0, thenCallCount)
         
-        resolve2?(value: value2)
-        resolve1?(value: value1)
-        resolve3?(value: value3)
+        resolve2?(value2)
+        resolve1?(value1)
+        resolve3?(value3)
         
         assertEquals(1, thenCallCount)
     }
@@ -375,11 +375,11 @@ class PledgeTests : XCTestCase {
         let allPledge = all(true, promises: (pledge1, pledge2, pledge3))
         let expectedError = newError("oh noes a kid kicked it", code: 19)
         allPledge.fail { error in
-            failCallCount++
+            failCallCount += 1
             assertEquals(expectedError, error)
         }
         assertEquals(0, failCallCount)
-        reject2?(error: expectedError)
+        reject2?(expectedError)
         assertEquals(1, failCallCount)
     }
     
@@ -390,10 +390,10 @@ class PledgeTests : XCTestCase {
         allPledge
             .then { value in
                 assertEquals(0, value.count)
-                thenCallCount++
+                thenCallCount += 1
             }
             .fail { error in
-                failCallCount++
+                failCallCount+=1
                 return
         }
         assertEquals(1, thenCallCount)
@@ -408,10 +408,10 @@ class PledgeTests : XCTestCase {
         allPledge
             .then { value in
                 assertEquals(0, value.count)
-                thenCallCount++
+                thenCallCount += 1
             }
             .fail { error in
-                failCallCount++
+                failCallCount+=1
                 return
         }
         assertEquals(1, thenCallCount)
@@ -420,68 +420,68 @@ class PledgeTests : XCTestCase {
     
     func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndRejectOnMainQueue(){
         let expectedValue = newError("Amazing answer from another wooooorld!", code: 10)
-        let resolveExpectation = expectationWithDescription("resolve occurred")
-        let failExpectation = expectationWithDescription("fail occurred")
+        let resolveExpectation = expectation(description: "resolve occurred")
+        let failExpectation = expectation(description: "fail occurred")
         
         let action : Pledge<String>.Action = { resolve, reject in
             resolveExpectation.fulfill()
-            reject(error: expectedValue)
+            reject(expectedValue)
         }
         let _ = runOnBackground(action).fail { value in
             failExpectation.fulfill()
             assertEquals(expectedValue, value)
         }
         
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_DefaultTimeoutIsShort() {
-        let failExpectation = expectationWithDescription("fail occurred")
-        let startTime = NSDate()
+        let failExpectation = expectation(description: "fail occurred")
+        let startTime = Date()
         Pledge<Int>().fail { error in
-            let duration = NSDate().timeIntervalSinceDate(startTime)
+            let duration = NSDate().timeIntervalSince(startTime)
             failExpectation.fulfill()
             XCTAssert( duration >= 0.01, "Duration was \(duration)")
             assertEquals("Pledge did not resolve or reject before timeout of 0.01 second.", error.localizedDescription)
         }
         
-        waitForExpectationsWithTimeout(0.05, handler: nil)
+        waitForExpectations(timeout: 0.05, handler: nil)
     }
     
     func testPledgesThatDoNotResolveOrRejectByTimeoutWillReject_TimeoutCanBeChanged() {
-        let failExpectation = expectationWithDescription("fail occurred")
-        let startTime = NSDate()
+        let failExpectation = expectation(description: "fail occurred")
+        let startTime = Date()
         Pledge<Int>(timeout: 0.5).fail { error in
-            let duration = NSDate().timeIntervalSinceDate(startTime)
+            let duration = NSDate().timeIntervalSince(startTime)
             failExpectation.fulfill()
             XCTAssert( duration >= 0.5, "Duration was \(duration)")
             assertEquals("Pledge did not resolve or reject before timeout of 0.5 second.", error.localizedDescription)
         }
         
-        waitForExpectationsWithTimeout(0.6, handler: nil)
+        waitForExpectations(timeout: 0.6, handler: nil)
     }
     
     func testPledgeThatDoesNotFailShortlyAfterBeingRejectedWillAutomaticallyUseFallback(){
-        let printExpectation = expectationWithDescription("fail occurred")
+        let printExpectation = expectation(description: "fail occurred")
         let expectedError = newError("Oh no!", code: 8)
         let originalFallback = pledgeFallbackReject
         pledgeFallbackReject = { error in
             printExpectation.fulfill()
             assertEquals("Uncaught Pledge failure: \(expectedError.localizedDescription)", error.localizedDescription)
         }
-        Pledge<Int>.reject(expectedError)
-        waitForExpectationsWithTimeout(0.01, handler: nil)
+        _ = Pledge<Int>.reject(expectedError)
+        waitForExpectations(timeout: 0.01, handler: nil)
         pledgeFallbackReject = originalFallback
     }
     
     func testPendingPledgeWillDispatchOnDefaultGlobalQueueAndResolveOnMainQueue(){
         let expectedValue = "Amazing answer from another wooooorld!"
-        let resolveExpectation = expectationWithDescription("resolve occurred")
-        let thenExpectation = expectationWithDescription("then occurred")
+        let resolveExpectation = expectation(description: "resolve occurred")
+        let thenExpectation = expectation(description: "then occurred")
         
         let action : Pledge<String>.Action = { resolve, reject in
             resolveExpectation.fulfill()
-            resolve(value: expectedValue)
+            resolve(expectedValue)
         }
         let _ = runOnBackground(action)
             .then { value in
@@ -489,10 +489,10 @@ class PledgeTests : XCTestCase {
                 assertEquals(expectedValue, value)
         }
         
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 }
 
-func newError(description: String, code: Int) -> NSError {
+func newError(_ description: String, code: Int) -> NSError {
     return NSError(domain: "PledgeTests", code: code, userInfo: [NSLocalizedDescriptionKey: description])
 }

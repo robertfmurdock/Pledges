@@ -7,36 +7,36 @@
 
 import Foundation
 
-public class IterableRoll<T : AnyObject> : SequenceType {
+open class IterableRoll<T : AnyObject> : Sequence {
     public typealias Element = T
     
-    private var items = [T]()
+    fileprivate var items = [T]()
     
     public init(){
     }
     
-    public func generate() -> IndexingGenerator<[T]> {
-        return items.generate()
+    open func makeIterator() -> IndexingIterator<[T]> {
+        return items.makeIterator()
     }
     
-    public func add(item : T) {
+    open func add(_ item : T) {
         self.items.append(item);
     }
     
-    public func remove(item : T) {
-        for (index, itemCandidate) in self.items.enumerate() {
+    open func remove(_ item : T) {
+        for (index, itemCandidate) in self.items.enumerated() {
             if itemCandidate === item {
-                items.removeAtIndex(index)
+                items.remove(at: index)
             }
         }
     }
     
-    public var isEmpty: Bool {
+    open var isEmpty: Bool {
         get { return items.isEmpty}
     }
 }
 
-public func containsObject<Seq : SequenceType where Seq.Generator.Element : AnyObject> (list : Seq, _ item : Seq.Generator.Element) -> Bool {
+public func containsObject<Seq : Sequence> (_ list : Seq, _ item : Seq.Iterator.Element) -> Bool where Seq.Iterator.Element : AnyObject {
     if let _ = firstIndexOf(item, inList: list){
         return true
     } else {
@@ -44,7 +44,7 @@ public func containsObject<Seq : SequenceType where Seq.Generator.Element : AnyO
     }
 }
 
-public func isContainedIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> Bool {
+public func isContainedIn<Seq : Sequence>(_ list: Seq, that matches: (Seq.Iterator.Element) -> Bool) -> Bool {
     if findWithIndexIn(list, that: matches) == nil {
         return false
     } else {
@@ -52,7 +52,7 @@ public func isContainedIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Gene
     }
 }
 
-public func findIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> Seq.Generator.Element? {
+public func findIn<Seq : Sequence>(_ list: Seq, that matches: (Seq.Iterator.Element) -> Bool) -> Seq.Iterator.Element? {
     if let result = findWithIndexIn(list, that: matches) {
         return result.item
     } else {
@@ -60,8 +60,8 @@ public func findIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.E
     }
 }
 
-public func findWithIndexIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Generator.Element) -> Bool) -> (item: Seq.Generator.Element, index: Int)? {
-    for (index, candidate) in list.enumerate() {
+public func findWithIndexIn<Seq : Sequence>(_ list: Seq, that matches: (Seq.Iterator.Element) -> Bool) -> (item: Seq.Iterator.Element, index: Int)? {
+    for (index, candidate) in list.enumerated() {
         if matches(candidate) {
             return (candidate, index)
         }
@@ -69,8 +69,8 @@ public func findWithIndexIn<Seq : SequenceType>(list: Seq, that matches: (Seq.Ge
     return nil
 }
 
-public func firstIndexOf<Seq : SequenceType where Seq.Generator.Element : AnyObject> (item : Seq.Generator.Element, inList list : Seq) -> Int? {
-    for (index, candidate) in list.enumerate() {
+public func firstIndexOf<Seq : Sequence> (_ item : Seq.Iterator.Element, inList list : Seq) -> Int? where Seq.Iterator.Element : AnyObject {
+    for (index, candidate) in list.enumerated() {
         if candidate === item {
             return index
         }

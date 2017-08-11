@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Pods-PledgesTests-ArmorTestKit.xcscheme</key>
+		<key>ArmorTestKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -17,12 +17,12 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>5F7902FACA002B04A95ACC7D</key>
+		<key>5A33A10EB719321C14A6D8ADD792570F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>ACD26E6BBC86929E7AED20BA</key>
+		<key>7C77E2ED56C3664F874896597C3F04B9</key>
 		<dict>
 			<key>primary</key>
 			<true/>

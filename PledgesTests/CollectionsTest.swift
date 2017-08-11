@@ -19,7 +19,7 @@ class IterableRollTest : XCTestCase {
     func testBunchStartsEmpty()  {
         let bunch : IterableRoll<StubObject> = IterableRoll()
         
-        var generator = bunch.generate()
+        var generator = bunch.makeIterator()
         XCTAssertTrue(generator.next() == nil)
     }
     
