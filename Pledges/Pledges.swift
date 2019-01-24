@@ -176,7 +176,7 @@ open class Pledge <T> : Promise {
     
     open func when(then : @escaping ( _ value: Any) -> Void) -> Promise {
         let wrappedThen : Resolve = { value in
-            then(value: value)
+            then(value)
         }
         return self.then(wrappedThen)
     }
@@ -352,8 +352,8 @@ private func reportCumulativeError<T>(_ results: [Int: T], errors: [Int: NSError
     }
 }
 
-private func Error(_ description: String, code: Int, userInfo: [AnyHashable: Any]? = nil) -> NSError {
-    var revisedUserInfo: [AnyHashable: Any] = userInfo ?? [:]
+private func Error(_ description: String, code: Int, userInfo: [String: Any]? = nil) -> NSError {
+    var revisedUserInfo: [String: Any] = userInfo ?? [:]
     revisedUserInfo[NSLocalizedDescriptionKey] = description
     return NSError(domain: "Pledges", code: code, userInfo: revisedUserInfo)
 }
